@@ -1,6 +1,6 @@
 {
-  "name": "rim",
-  "productName": "Rim",
+  "name": "ledge",
+  "productName": "Ledge",
   "version": "0.1.0",
   "description": "Your AI usage, on the screen edge",
   "main": "main.js",

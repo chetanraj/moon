@@ -24,6 +24,14 @@ function bandColor(frac) {
   return "var(--critical)";
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function resetCopy(ts) {
   if (!ts) return "";
   const seconds = (ts - Date.now()) / 1000;
@@ -196,7 +204,8 @@ function render(snapshot) {
     btn.addEventListener("mouseleave", hideTipSoon);
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (provider.manageURL) window.rim.open(provider.manageURL);
+      if (didDrag) return;
+      if (provider.manageURL) window.ledge.open(provider.manageURL);
     });
     cellsEl.appendChild(btn);
   }
@@ -225,7 +234,7 @@ function showTip(provider, cell) {
     .map((w) => {
       const frac = Math.min(1, Math.max(0, w.usedFraction ?? 0));
       return `<div class="window">
-        <div class="split"><span class="lead">${w.label}</span><span class="trail">${resetCopy(w.resetsAt)}</span></div>
+        <div class="split"><span class="lead">${escapeHtml(w.label)}</span><span class="trail">${escapeHtml(resetCopy(w.resetsAt))}</span></div>
         <div class="bar"><span style="width:${frac * 100}%;background:${bandColor(frac)}"></span></div>
         <div class="used">${Math.round(frac * 100)}% Used${provider.stale ? " · stale" : ""}</div>
       </div>`;
@@ -233,7 +242,7 @@ function showTip(provider, cell) {
     .join("");
   tooltip.innerHTML = `
     <svg class="tail" viewBox="0 0 28 33" aria-hidden="true"><path fill="var(--card-bg)" d="M0 0 L28 16.5 L0 33 Z"/></svg>
-    <div class="tip-head">${glyph(provider.id)}<span>${provider.displayName} Usage</span></div>
+    <div class="tip-head">${glyph(provider.id)}<span>${escapeHtml(provider.displayName)} Usage</span></div>
     ${rows || "<p class='status'>No reading</p>"}`;
   tooltip.classList.add("visible");
   const cellRect = cell.getBoundingClientRect();
@@ -248,11 +257,11 @@ function showTip(provider, cell) {
 
 function refreshNow() {
   notchEl.classList.add("refreshing");
-  window.rim.refresh();
+  window.ledge.refresh();
 }
 
 function trackMouse(over) {
-  window.rim.mouse(over);
+  window.ledge.mouse(over);
 }
 
 function expand() {
@@ -281,35 +290,51 @@ notchEl.addEventListener("mouseenter", () => {
   expand();
 });
 notchEl.addEventListener("mouseleave", () => {
+  if (dragStart != null) return;
   if (!tooltip.classList.contains("visible")) trackMouse(false);
   collapseSoon();
 });
 document.body.addEventListener("mouseleave", () => {
+  if (dragStart != null) return;
   trackMouse(false);
   collapseSoon();
 });
 
+function axisPos(e) {
+  const horizontal = currentPrefs.edge === "top" || currentPrefs.edge === "bottom";
+  return horizontal ? e.clientX : e.clientY;
+}
+
 notchEl.addEventListener("pointerdown", (e) => {
   if (e.button !== 0) return;
-  const horizontal = currentPrefs.edge === "top" || currentPrefs.edge === "bottom";
-  dragStart = horizontal ? e.clientX : e.clientY;
+  trackMouse(true);
+  dragStart = axisPos(e);
   dragStartOffset = currentPrefs.offset || 0;
   didDrag = false;
-  notchEl.setPointerCapture(e.pointerId);
+  notchEl.classList.add("dragging");
+  try {
+    notchEl.setPointerCapture(e.pointerId);
+  } catch {
+    /* capture is best-effort on a click-through window */
+  }
 });
-notchEl.addEventListener("pointermove", (e) => {
+window.addEventListener("pointermove", (e) => {
   if (dragStart == null) return;
-  const horizontal = currentPrefs.edge === "top" || currentPrefs.edge === "bottom";
-  const d = (horizontal ? e.clientX : e.clientY) - dragStart;
-  if (Math.abs(d) > 4) didDrag = true;
+  const d = axisPos(e) - dragStart;
+  if (Math.abs(d) > 3) didDrag = true;
   if (!didDrag) return;
+  e.preventDefault();
   currentPrefs.offset = clampOffset(dragStartOffset + d);
   applyOffset();
 });
-notchEl.addEventListener("pointerup", () => {
+function endDrag() {
+  if (dragStart == null) return;
   dragStart = null;
-  if (didDrag) window.rim.setPrefs({ offset: currentPrefs.offset });
-});
+  notchEl.classList.remove("dragging");
+  if (didDrag) window.ledge.setPrefs({ offset: currentPrefs.offset });
+}
+window.addEventListener("pointerup", endDrag);
+window.addEventListener("pointercancel", endDrag);
 
 notchEl.addEventListener("click", (e) => {
   if (e.target.closest(".cell")) return;
@@ -321,11 +346,11 @@ notchEl.addEventListener("click", (e) => {
 notchEl.addEventListener("dblclick", (e) => {
   e.preventDefault();
   clearTimeout(clickTimer);
-  window.rim.quit();
+  window.ledge.quit();
 });
 notchEl.addEventListener("contextmenu", (e) => {
   e.preventDefault();
-  window.rim.menu();
+  window.ledge.menu();
 });
-window.rim.onUsage(render);
-window.rim.get().then(render);
+window.ledge.onUsage(render);
+window.ledge.get().then(render);

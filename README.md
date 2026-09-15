@@ -1,4 +1,4 @@
-# Rim
+# Ledge
 
 **Your AI usage** — a small always-on-top notch on a Mac screen edge that shows how much of each coding assistant’s limit you have burned.
 
@@ -9,8 +9,8 @@ macOS + Electron. Early / soft launch: run from source.
 ## Run
 
 ```sh
-git clone https://github.com/chetanraj/rim.git
-cd rim
+git clone https://github.com/chetanraj/ledge.git
+cd ledge
 npm install
 npm start
 ```
@@ -22,7 +22,7 @@ No Dock icon. Control lives in the **menu bar** (usage-ring glyph):
 - Click a ring to open that product’s usage page
 - Drag along the edge to move; double-click the notch to quit
 
-Prefs: `~/.rim`
+Prefs: `~/.ledge`
 
 ## What it meters
 
@@ -39,7 +39,7 @@ Prefs: `~/.rim`
 
 ## Privacy
 
-Rim only reads credentials those apps already stored locally. It does not send them anywhere except the same usage endpoints those products already call.
+Ledge only reads credentials those apps already stored locally. It does not send them anywhere except the same usage endpoints those products already call.
 
 ## License
 

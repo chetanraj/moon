@@ -2,7 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const DIR = path.join(os.homedir(), ".rim");
+const DIR = path.join(os.homedir(), ".ledge");
 const FILE = path.join(DIR, "prefs.json");
 
 const DEFAULTS = {

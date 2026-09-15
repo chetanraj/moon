@@ -19,7 +19,6 @@ const prefs = require("./prefs");
 const TIP = 340;
 
 let win;
-let settingsWin;
 let tray;
 let lastSnapshot = { fetchedAt: 0, providers: [] };
 
@@ -83,7 +82,7 @@ function trayIcon() {
 function ensureTray() {
   if (tray) return;
   tray = new Tray(trayIcon());
-  tray.setToolTip("Rim — your AI usage");
+  tray.setToolTip("Ledge — your AI usage");
   rebuildTray();
 }
 
@@ -143,7 +142,7 @@ function rebuildTray() {
         })),
       },
       { type: "separator" },
-      { label: "Quit Rim", click: () => app.quit() },
+      { label: "Quit Ledge", click: () => app.quit() },
     ])
   );
 }
@@ -175,31 +174,6 @@ function createWindow() {
   win.loadFile(path.join(__dirname, "renderer", "index.html"));
   placeWindow();
   screen.on("display-metrics-changed", placeWindow);
-}
-
-function openSettings() {
-  if (settingsWin && !settingsWin.isDestroyed()) {
-    settingsWin.show();
-    settingsWin.focus();
-    return;
-  }
-  settingsWin = new BrowserWindow({
-    width: 420,
-    height: 560,
-    title: "Rim",
-    resizable: false,
-    minimizable: false,
-    fullscreenable: false,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
-  settingsWin.loadFile(path.join(__dirname, "renderer", "settings.html"));
-  settingsWin.on("closed", () => {
-    settingsWin = null;
-  });
 }
 
 function frontmostFullscreen() {
@@ -256,7 +230,7 @@ function pushPrefs() {
   applyChrome();
 }
 
-app.setName("Rim");
+app.setName("Ledge");
 
 app.whenReady().then(async () => {
   nativeTheme.themeSource = "system";
@@ -287,17 +261,18 @@ ipcMain.on("mouse", (_e, over) => {
   win.setIgnoreMouseEvents(!over, { forward: true });
 });
 ipcMain.on("menu", () => {
-  Menu.buildFromTemplate([
-    { label: "Refresh now", click: () => refresh() },
-    { label: "Settings…", click: () => openSettings() },
-    { type: "separator" },
-    { label: "Quit Rim", click: () => app.quit() },
-  ]).popup({ window: win });
+  rebuildTray();
+  if (tray) tray.popUpContextMenu();
 });
-ipcMain.on("settings", () => openSettings());
 ipcMain.on("quit", () => app.quit());
 ipcMain.on("open", (_e, url) => {
-  if (url) shell.openExternal(url);
+  try {
+    const parsed = new URL(String(url));
+    if (parsed.protocol !== "https:") return;
+    shell.openExternal(parsed.toString());
+  } catch {
+    /* ignore bad urls */
+  }
 });
 
 app.on("window-all-closed", () => app.quit());
