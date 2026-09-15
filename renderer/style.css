@@ -1,0 +1,349 @@
+:root {
+  color-scheme: light dark;
+  --notch: #000;
+  --card-bg: #000;
+  --track: #303030;
+  --fill: #2a2a2a;
+  --bar-track: #2d2d2d;
+  --ample: #00ff88;
+  --watch: #f2ff00;
+  --critical: #ff3f00;
+  --text: #fff;
+  --muted: #808080;
+  --ring: 44px;
+  --depth: 70px;
+  --curl: 39px;
+  --card: 226px;
+  --card-pad: 12px;
+  --tail-w: 28px;
+  --tail-h: 33px;
+  --tail-gap: 11px;
+  --ease: cubic-bezier(0.32, 0.78, 0, 1);
+  --card-shadow: none;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --notch: #f4f4f4;
+    --card-bg: #fff;
+    --track: #d4d4d4;
+    --fill: #ececec;
+    --bar-track: #e4e4e4;
+    --ample: #00b86b;
+    --watch: #c9b800;
+    --critical: #e03600;
+    --text: #111;
+    --muted: #6e6e6e;
+    --card-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.stage {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.stage.edge-left {
+  justify-content: flex-start;
+}
+.stage.edge-top {
+  justify-content: center;
+  align-items: flex-start;
+}
+.stage.edge-bottom {
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.notch {
+  position: relative;
+  width: var(--depth);
+  height: 400px;
+  z-index: 1;
+  transform: translateY(var(--shift, 0px));
+  cursor: ns-resize;
+  transition:
+    width 280ms var(--ease),
+    height 280ms var(--ease);
+}
+
+.stage.edge-left .notch-shape {
+  transform: scaleX(-1);
+}
+.stage.edge-top .notch,
+.stage.edge-bottom .notch {
+  cursor: ew-resize;
+}
+.stage.edge-top .cells,
+.stage.edge-bottom .cells {
+  flex-direction: row;
+  padding-top: 0;
+  padding-left: calc(var(--curl) + 26px);
+  height: 100%;
+  justify-content: center;
+}
+.stage.edge-top .notch,
+.stage.edge-bottom .notch {
+  transform: translateX(var(--shift, 0px));
+}
+
+.notch.pill {
+  width: 26px;
+}
+.stage.edge-top .notch.pill,
+.stage.edge-bottom .notch.pill {
+  width: 80px;
+  height: 26px;
+}
+.notch.pill .cells {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.notch[hidden] {
+  display: none;
+}
+
+.notch-shape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.notch-shape path {
+  fill: var(--notch);
+}
+
+.cells {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: calc(var(--curl) + 26px);
+  gap: 31px;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  animation: rise 420ms var(--ease) both;
+}
+
+.notch.refreshing .meter {
+  animation: spin 0.95s cubic-bezier(0.32, 0, 0.14, 1);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(270deg);
+  }
+}
+
+.cell:nth-child(2) {
+  animation-delay: 45ms;
+}
+.cell:nth-child(3) {
+  animation-delay: 90ms;
+}
+.cell:nth-child(4) {
+  animation-delay: 135ms;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ring-wrap {
+  width: var(--ring);
+  height: var(--ring);
+  position: relative;
+}
+
+.ring-wrap svg.meter {
+  width: var(--ring);
+  height: var(--ring);
+  display: block;
+  transform: rotate(-90deg);
+}
+
+.glyph-slot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+}
+
+.glyph {
+  width: 17px;
+  height: 17px;
+}
+
+.pct {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltip {
+  position: absolute;
+  right: calc(var(--depth) + var(--tail-gap) + var(--tail-w));
+  width: var(--card);
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 19px;
+  padding: var(--card-pad);
+  opacity: 0;
+  transform: translateX(8px);
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: var(--card-shadow);
+  transition:
+    opacity 180ms var(--ease),
+    transform 500ms cubic-bezier(0.32, 0.86, 0, 1);
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.tooltip .tail {
+  position: absolute;
+  right: calc(-1 * var(--tail-w));
+  top: var(--tail-y, 50%);
+  transform: translateY(-50%);
+  width: var(--tail-w);
+  height: var(--tail-h);
+}
+
+.tip-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.tip-head .glyph {
+  width: 16px;
+  height: 16px;
+}
+
+.window {
+  margin-top: 8px;
+}
+
+.split {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.split .lead {
+  color: var(--text);
+}
+.split .trail {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.bar {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bar-track);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  min-width: 4px;
+  transition: width 900ms cubic-bezier(0.32, 0.9, 0, 1);
+}
+
+.used {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--text);
+}
+
+.status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--critical);
+  line-height: 18px;
+}
+
+.cell.stale {
+  opacity: 0.45;
+}
+
+.stage.edge-left .tooltip {
+  right: auto;
+  left: calc(var(--depth) + var(--tail-gap) + var(--tail-w));
+}
+.stage.edge-left .tooltip .tail {
+  right: auto;
+  left: calc(-1 * var(--tail-w));
+  transform: translateY(-50%) scaleX(-1);
+}
+.stage.edge-top .tooltip {
+  right: auto;
+  top: calc(var(--depth) + var(--tail-gap) + var(--tail-w));
+  left: var(--tip-x, 50%);
+}
+.stage.edge-bottom .tooltip {
+  right: auto;
+  bottom: calc(var(--depth) + var(--tail-gap) + var(--tail-w));
+  top: auto;
+  left: var(--tip-x, 50%);
+}

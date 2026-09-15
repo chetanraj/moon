@@ -1,0 +1,15 @@
+{
+  "name": "rim",
+  "productName": "Rim",
+  "version": "0.1.0",
+  "description": "Your AI usage, on the screen edge",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^35.7.5"
+  }
+}
