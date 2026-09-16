@@ -2,7 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const DIR = path.join(os.homedir(), ".ledge");
+const DIR = path.join(os.homedir(), ".moon");
 const FILE = path.join(DIR, "prefs.json");
 
 const DEFAULTS = {
@@ -10,6 +10,7 @@ const DEFAULTS = {
   offset: 0,
   collapsed: false,
   hideOnFullscreen: true,
+  lockup: "percent",
   disabled: [],
 };
 

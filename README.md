@@ -1,4 +1,4 @@
-# Ledge
+# Moon
 
 **Your AI usage** — a small always-on-top notch on a Mac screen edge that shows how much of each coding assistant’s limit you have burned.
 
@@ -9,20 +9,21 @@ macOS + Electron. Early / soft launch: run from source.
 ## Run
 
 ```sh
-git clone https://github.com/chetanraj/ledge.git
-cd ledge
+git clone https://github.com/chetanraj/moon.git
+cd moon
 npm install
 npm start
 ```
 
-No Dock icon. Control lives in the **menu bar** (usage-ring glyph):
+No Dock icon. Control lives in the **menu bar** (moon glyph + remaining %):
 
+- Count / Percent / Meter lockups
 - Refresh, edge (left / right / top / bottom), collapse, hide on fullscreen, providers, quit
 - Hover a ring for windows and reset times
 - Click a ring to open that product’s usage page
 - Drag along the edge to move; double-click the notch to quit
 
-Prefs: `~/.ledge`
+Prefs: `~/.moon`
 
 ## What it meters
 
@@ -39,7 +40,7 @@ Prefs: `~/.ledge`
 
 ## Privacy
 
-Ledge only reads credentials those apps already stored locally. It does not send them anywhere except the same usage endpoints those products already call.
+Moon only reads credentials those apps already stored locally. It does not send them anywhere except the same usage endpoints those products already call.
 
 ## License
 

@@ -6,14 +6,13 @@ const {
   Menu,
   nativeTheme,
   Tray,
-  nativeImage,
   shell,
 } = require("electron");
-const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 const { pollAll, catalog } = require("./providers");
 const prefs = require("./prefs");
+const { createTrayImage, trayTooltip, lockupTitle, lockupMenuLabel } = require("./trayIcon");
 
 
 const TIP = 340;
@@ -71,18 +70,24 @@ function applyChrome() {
   rebuildTray();
 }
 
-function trayIcon() {
-  const two = path.join(__dirname, "assets", "trayTemplate@2x.png");
-  const one = path.join(__dirname, "assets", "trayTemplate.png");
-  const image = nativeImage.createFromPath(fs.existsSync(two) ? two : one);
-  image.setTemplateImage(true);
-  return image;
+function lockupMode() {
+  return currentPrefs().lockup || "percent";
+}
+
+function paintTray() {
+  if (!tray) return;
+  const mode = lockupMode();
+  tray.setImage(createTrayImage(lastSnapshot, mode));
+  tray.setTitle(lockupTitle(lastSnapshot, mode));
+  tray.setToolTip(trayTooltip(lastSnapshot));
 }
 
 function ensureTray() {
   if (tray) return;
-  tray = new Tray(trayIcon());
-  tray.setToolTip("Ledge — your AI usage");
+  const mode = lockupMode();
+  tray = new Tray(createTrayImage(lastSnapshot, mode));
+  tray.setTitle(lockupTitle(lastSnapshot, mode));
+  tray.setToolTip(trayTooltip(lastSnapshot));
   rebuildTray();
 }
 
@@ -94,6 +99,18 @@ function rebuildTray() {
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: "Refresh now", click: () => refresh() },
+      { type: "separator" },
+      { label: "Menu bar", enabled: false },
+      ...["count", "percent", "meter"].map((mode) => ({
+        label: lockupMenuLabel(mode, lastSnapshot),
+        type: "radio",
+        checked: (p.lockup || "percent") === mode,
+        click: () => {
+          prefs.save({ lockup: mode });
+          paintTray();
+          rebuildTray();
+        },
+      })),
       { type: "separator" },
       {
         label: "Edge",
@@ -142,7 +159,7 @@ function rebuildTray() {
         })),
       },
       { type: "separator" },
-      { label: "Quit Ledge", click: () => app.quit() },
+      { label: "Quit Moon", click: () => app.quit() },
     ])
   );
 }
@@ -218,6 +235,7 @@ async function refresh() {
   const payload = { ...lastSnapshot, prefs: currentPrefs() };
   if (win && !win.isDestroyed()) win.webContents.send("usage", payload);
   rebuildTray();
+  paintTray();
   return payload;
 }
 
@@ -230,14 +248,23 @@ function pushPrefs() {
   applyChrome();
 }
 
-app.setName("Ledge");
+app.setName("Moon");
 
 app.whenReady().then(async () => {
   nativeTheme.themeSource = "system";
   Menu.setApplicationMenu(null);
-  applyChrome();
+  try {
+    applyChrome();
+  } catch (err) {
+    console.error("chrome", err);
+  }
   createWindow();
-  await refresh();
+  nativeTheme.on("updated", paintTray);
+  try {
+    await refresh();
+  } catch (err) {
+    console.error("refresh", err);
+  }
   setInterval(refresh, 60_000);
   setInterval(applyFullscreenHide, 2000);
 });

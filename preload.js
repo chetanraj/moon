@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("ledge", {
+contextBridge.exposeInMainWorld("moon", {
   get: () => ipcRenderer.invoke("usage:get"),
   refresh: () => ipcRenderer.invoke("usage:refresh"),
   onUsage: (fn) => ipcRenderer.on("usage", (_e, data) => fn(data)),

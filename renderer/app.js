@@ -205,7 +205,7 @@ function render(snapshot) {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       if (didDrag) return;
-      if (provider.manageURL) window.ledge.open(provider.manageURL);
+      if (provider.manageURL) window.moon.open(provider.manageURL);
     });
     cellsEl.appendChild(btn);
   }
@@ -257,11 +257,11 @@ function showTip(provider, cell) {
 
 function refreshNow() {
   notchEl.classList.add("refreshing");
-  window.ledge.refresh();
+  window.moon.refresh();
 }
 
 function trackMouse(over) {
-  window.ledge.mouse(over);
+  window.moon.mouse(over);
 }
 
 function expand() {
@@ -331,7 +331,7 @@ function endDrag() {
   if (dragStart == null) return;
   dragStart = null;
   notchEl.classList.remove("dragging");
-  if (didDrag) window.ledge.setPrefs({ offset: currentPrefs.offset });
+  if (didDrag) window.moon.setPrefs({ offset: currentPrefs.offset });
 }
 window.addEventListener("pointerup", endDrag);
 window.addEventListener("pointercancel", endDrag);
@@ -346,11 +346,11 @@ notchEl.addEventListener("click", (e) => {
 notchEl.addEventListener("dblclick", (e) => {
   e.preventDefault();
   clearTimeout(clickTimer);
-  window.ledge.quit();
+  window.moon.quit();
 });
 notchEl.addEventListener("contextmenu", (e) => {
   e.preventDefault();
-  window.ledge.menu();
+  window.moon.menu();
 });
-window.ledge.onUsage(render);
-window.ledge.get().then(render);
+window.moon.onUsage(render);
+window.moon.get().then(render);
